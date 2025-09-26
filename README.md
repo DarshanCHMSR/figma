@@ -5,10 +5,32 @@ This is a chat application built with React (Vite) frontend and Node.js/Express 
 ## Project Structure
 
 ```
-.
-├── frontend/          # React frontend with Vite
-├── backend/           # Node.js backend with Express and SQLite
-└── README.md
+figma/
+├── frontend/                          # React Frontend Application
+│   ├── src/
+│   │   ├── components/               # React Components
+│   │   │   ├── ChatInterface.jsx     # Main chat UI component
+│   │   │   ├── ChatInterface.css     # Chat styling
+│   │   │   ├── Login.jsx            # Login form component
+│   │   │   ├── Signup.jsx           # Registration form
+│   │   │   ├── Auth.css             # Authentication styling
+│   │   │   └── ProtectedRoute.jsx   # Route protection
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx      # Global auth state
+│   │   ├── App.jsx                  # Main app component
+│   │   ├── App.css                  # Global app styles
+│   │   ├── index.css                # Root styles
+│   │   └── main.jsx                 # App entry point
+│   ├── package.json                 # Frontend dependencies
+│   └── vite.config.js              # Vite configuration
+├── backend/                         # Node.js Backend Server
+│   ├── middleware/
+│   │   └── auth.js                  # JWT authentication middleware
+│   ├── server.js                    # Express server and API routes
+│   ├── package.json                 # Backend dependencies
+│   └── chat.db                      # SQLite database (auto-created)
+├── .gitignore                       # Git ignore rules
+└── README.md                        # Project documentation
 ```
 
 ## Features
@@ -61,95 +83,327 @@ This is a chat application built with React (Vite) frontend and Node.js/Express 
 
    The frontend will run on `http://localhost:5173`
 
-## API Endpoints
+## API Documentation
 
-### Authentication
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/me` - Get current user info (protected)
+### Authentication Endpoints
 
-### Chat
-- `GET /api/groups/:groupId` - Get group information
-- `GET /api/groups/:groupId/messages` - Get all messages for a group
-- `POST /api/groups/:groupId/messages` - Send a new message (protected)
-- `GET /api/groups` - Get all groups
+#### POST `/api/auth/register`
+Register a new user account
+```json
+// Request Body
+{
+  "username": "string (min 3 chars)",
+  "email": "valid-email@domain.com", 
+  "password": "string (min 6 chars)"
+}
 
-## Technologies Used
+// Response (201)
+{
+  "token": "jwt-token-string",
+  "user": {
+    "id": 1,
+    "username": "username",
+    "email": "email@domain.com"
+  }
+}
+```
 
-### Frontend
-- React 18
-- Vite
-- React Router DOM (for navigation)
-- React Context API (for state management)
-- Lucide React (for icons)
-- Axios (for API calls)
-- CSS3 with Flexbox and animations
+#### POST `/api/auth/login`
+Login existing user
+```json
+// Request Body
+{
+  "email": "user@domain.com",
+  "password": "userpassword"
+}
 
-### Backend
-- Node.js
-- Express.js
-- SQLite3 (database)
-- JWT (authentication)
-- bcryptjs (password hashing)
-- express-validator (input validation)
-- CORS
-- Nodemon (for development)
+// Response (200)
+{
+  "token": "jwt-token-string",
+  "user": {
+    "id": 1,
+    "username": "username", 
+    "email": "email@domain.com"
+  }
+}
+```
+
+#### GET `/api/auth/me` 🔒
+Get current authenticated user info
+```json
+// Headers: Authorization: Bearer <jwt-token>
+// Response (200)
+{
+  "id": 1,
+  "username": "username",
+  "email": "email@domain.com"
+}
+```
+
+### Chat Endpoints
+
+#### GET `/api/groups/:groupId/messages`
+Get all messages for a specific group
+```json
+// Response (200)
+[
+  {
+    "id": 1,
+    "group_id": 1,
+    "user_id": 1,
+    "username": "sender",
+    "message": "Hello world!",
+    "timestamp": "2025-09-27T10:30:00.000Z"
+  }
+]
+```
+
+#### POST `/api/groups/:groupId/messages` 🔒
+Send a new message to a group
+```json
+// Headers: Authorization: Bearer <jwt-token>
+// Request Body
+{
+  "message": "Your message content"
+}
+
+// Response (201)
+{
+  "id": 5,
+  "group_id": 1,
+  "user_id": 1,
+  "username": "sender",
+  "message": "Your message content",
+  "timestamp": "2025-09-27T10:35:00.000Z"
+}
+```
+
+#### GET `/api/groups/:groupId`
+Get group information
+```json
+// Response (200)
+{
+  "id": 1,
+  "name": "Fun Friday Group",
+  "description": "A group for fun discussions",
+  "created_at": "2025-09-27T09:00:00.000Z"
+}
+```
+
+#### GET `/api/groups`
+Get all available groups
+```json
+// Response (200)
+[
+  {
+    "id": 1,
+    "name": "Fun Friday Group",
+    "description": "A group for fun discussions"
+  }
+]
+```
+
+**Legend**: 🔒 = Protected endpoint (requires JWT token)
+
+## Tech Stack
+
+### Frontend Technologies
+- **React 18** - Modern React with hooks and functional components
+- **Vite** - Fast build tool and development server
+- **React Router DOM** - Client-side routing and navigation
+- **React Context API** - Global state management for authentication
+- **Lucide React** - Beautiful, customizable SVG icons
+- **Axios** - HTTP client for API requests
+- **CSS3** - Modern styling with Flexbox, Grid, and animations
+- **React Hooks** - useState, useEffect, useContext, useRef
+
+### Backend Technologies
+- **Node.js** - JavaScript runtime environment
+- **Express.js** - Web application framework
+- **SQLite3** - Lightweight, file-based SQL database
+- **JWT (jsonwebtoken)** - Secure user authentication tokens
+- **bcryptjs** - Password hashing and security
+- **express-validator** - Input validation and sanitization
+- **CORS** - Cross-Origin Resource Sharing middleware
+- **Nodemon** - Auto-restart development server
+
+### Development Tools
+- **npm** - Package manager
+- **Git** - Version control
+- **VS Code** - Code editor (recommended)
+- **PowerShell/Terminal** - Command line interface
+
+### Architecture Patterns
+- **RESTful API** - Clean API design with proper HTTP methods
+- **JWT Authentication** - Stateless authentication system
+- **Component-Based Architecture** - Reusable React components
+- **Context Pattern** - Centralized state management
+- **Protected Routes** - Route-level authentication guards
+- **Responsive Design** - Mobile-first CSS approach
+
+## Application Status: ✅ WORKING
+
+This chat application is fully functional with complete authentication and real-time messaging capabilities.
 
 ## Usage
 
-1. Start both backend and frontend servers
-2. Open `http://localhost:5173` in your browser
-3. **Create an Account**: Click "Sign up" to create a new account
-4. **Login**: Use your credentials to log in
-5. **Chat**: Start chatting! Messages are saved with your username
-6. **Logout**: Click the user icon in the header to access logout option
+### Quick Start
+1. **Start Backend Server**:
+   ```bash
+   cd backend
+   npm install
+   npm run dev
+   ```
+   Server runs on `http://localhost:5000`
 
-### First Time Setup
-- The app will redirect to login page
-- Create an account with username, email, and password
-- After registration, you'll be automatically logged in and redirected to chat
+2. **Start Frontend Server**:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+   Frontend runs on `http://localhost:5173`
 
-## Database Schema
+3. **Open Application**: Navigate to `http://localhost:5173`
 
-### Groups Table
-- id (INTEGER PRIMARY KEY)
-- name (TEXT)
-- description (TEXT)
-- avatar (TEXT)
-- created_at (DATETIME)
+### User Flow
+1. **Registration**: Create account with username, email, and password (6+ characters)
+2. **Authentication**: Secure login with JWT tokens
+3. **Chat Interface**: Real-time messaging with responsive UI
+4. **User Management**: Profile menu with logout functionality
+5. **Message Persistence**: All messages saved to SQLite database
+
+### Features Currently Working ✅
+- ✅ User registration and login
+- ✅ JWT-based authentication
+- ✅ Protected routes and API endpoints
+- ✅ Real-time chat interface
+- ✅ Message persistence in database
+- ✅ Responsive mobile design
+- ✅ User avatars with initials
+- ✅ Loading states and error handling
+- ✅ Auto-scroll to new messages
+- ✅ Logout functionality
+
+## Database Schema (SQLite)
 
 ### Users Table
-- id (INTEGER PRIMARY KEY)
-- username (TEXT UNIQUE)
-- avatar (TEXT)
-- created_at (DATETIME)
+```sql
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,              -- bcrypt hashed
+    avatar TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### Groups Table  
+```sql
+CREATE TABLE groups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT,
+    avatar TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
 
 ### Messages Table
-- id (INTEGER PRIMARY KEY)
-- group_id (INTEGER)
-- user_id (INTEGER)
-- username (TEXT)
-- message (TEXT)
-- timestamp (DATETIME)
+```sql
+CREATE TABLE messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_id INTEGER,
+    user_id INTEGER,
+    username TEXT,
+    message TEXT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (group_id) REFERENCES groups (id),
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
+```
 
-## Sample Data
+## Key Features Implemented
 
-The application comes with pre-populated sample data including:
-- A "Fun Friday Group" 
-- Sample messages from "Anonymous" and "Kirtidan Gadhvi"
-- Realistic timestamps
+### 🔐 Security & Authentication
+- **JWT Authentication** - Secure token-based auth system
+- **Password Hashing** - bcrypt for secure password storage
+- **Protected Routes** - Frontend and backend route protection
+- **Input Validation** - Server-side validation with express-validator
+- **CORS Configuration** - Secure cross-origin requests
 
-## Mobile Responsiveness
+### 💬 Chat Functionality
+- **Real-time Messaging** - Instant message display and sending
+- **Message Persistence** - All messages saved to SQLite database
+- **User Attribution** - Messages linked to authenticated users
+- **Auto-scroll** - Automatic scroll to latest messages
+- **Loading States** - Visual feedback during operations
 
-The chat interface is designed to be mobile-first and works well on:
-- Desktop browsers
-- Mobile devices (iOS/Android)
-- Tablets
+### 🎨 User Interface
+- **Mobile-First Design** - Responsive layout for all screen sizes
+- **Modern UI Components** - Clean, intuitive interface design
+- **User Avatars** - Generated avatars with user initials
+- **Loading Animations** - Smooth loading spinners and transitions
+- **Error Handling** - User-friendly error messages
 
-## Development Notes
+### 🏗️ Architecture
+- **Component-Based** - Modular React component structure
+- **Context API** - Global state management for authentication
+- **RESTful API** - Clean API design with proper HTTP methods
+- **Database Relations** - Proper foreign key relationships
+- **Code Organization** - Separation of concerns and clean code
 
-- Backend runs on port 5000
-- Frontend runs on port 5173
-- CORS is enabled for cross-origin requests
-- SQLite database file is created automatically
-- Sample data is inserted on first run
+## Troubleshooting
+
+### Common Issues & Solutions
+
+#### 1. Server Won't Start
+```bash
+# Check if ports are in use
+netstat -ano | findstr :5000
+netstat -ano | findstr :5173
+
+# Kill processes if needed
+taskkill /F /PID <process-id>
+```
+
+#### 2. Database Issues
+```bash
+# Delete and recreate database
+cd backend
+rm chat.db
+npm run dev  # Will recreate database with fresh schema
+```
+
+#### 3. Frontend Build Issues  
+```bash
+cd frontend
+rm -rf node_modules package-lock.json
+npm install
+npm run dev
+```
+
+#### 4. Authentication Errors
+- Ensure backend server is running on port 5000
+- Check browser network tab for API errors
+- Verify JWT token is being sent in requests
+
+### Development Tips
+- Use browser DevTools to debug frontend issues
+- Check backend terminal for server error logs
+- Use database browser to inspect SQLite data
+- Test API endpoints with Postman or curl
+
+## Browser Compatibility
+- ✅ Chrome (recommended)
+- ✅ Firefox
+- ✅ Safari
+- ✅ Edge
+- ✅ Mobile browsers (iOS Safari, Chrome Mobile)
+
+## Performance
+- **Fast Startup** - Vite dev server with hot reload
+- **Lightweight Database** - SQLite for minimal overhead
+- **Optimized Bundles** - Vite production builds
+- **Efficient Rendering** - React hooks and context optimization
